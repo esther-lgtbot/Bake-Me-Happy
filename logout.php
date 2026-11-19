@@ -1,0 +1,1 @@
+<?php header('Location: /EL3/auth/logout.php'); exit;

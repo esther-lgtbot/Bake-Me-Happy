@@ -1,0 +1,1 @@
+<?php header('Location: /EL3/seller/index.php'); exit;

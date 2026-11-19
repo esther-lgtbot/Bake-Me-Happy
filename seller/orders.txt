@@ -1,0 +1,41 @@
+<?php
+require '../config/db.php';
+require '../includes/header.php';
+
+// wala kasing username column sa users mo, kaya name/email gamitin
+$orders = $pdo->query("SELECT o.*, u.name as buyer_name, u.email FROM orders o LEFT JOIN users u ON o.user_id=u.id ORDER BY o.id DESC")->fetchAll();
+
+if(isset($_POST['update_status'])){
+  $pdo->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$_POST['status'], $_POST['order_id']]);
+  header("Location: orders.php"); exit;
+}
+?>
+
+<div class="container mt-4">
+  <h3>Seller - Manage Orders</h3>
+  <table class="table table-bordered" style="background:#FFFBF7;">
+    <tr style="background:#F8D8B8;"><th>Order ID</th><th>Buyer</th><th>Total</th><th>Status</th><th>Action</th></tr>
+    <?php foreach($orders as $o): ?>
+    <tr>
+      <td>#<?= $o['id'] ?></td>
+      <td><?= htmlspecialchars($o['buyer_name'] ?? $o['email'] ?? 'User #'.$o['user_id']) ?></td>
+      <td>₱<?= number_format($o['total'],2) ?></td>
+      <td><span class="badge" style="background:#FF8A9D;"><?= $o['status'] ?></span></td>
+      <td>
+        <form method="POST" style="display:inline;">
+          <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
+          <select name="status" class="form-select form-select-sm d-inline w-auto">
+            <option value="pending" <?= $o['status']=='pending'?'selected':'' ?>>pending</option>
+            <option value="accepted" <?= $o['status']=='accepted'?'selected':'' ?>>accepted</option>
+            <option value="completed" <?= $o['status']=='completed'?'selected':'' ?>>completed</option>
+            <option value="cancelled" <?= $o['status']=='cancelled'?'selected':'' ?>>cancelled</option>
+          </select>
+          <button name="update_status" class="btn btn-sm" style="background:#A05A2C; color:white;">Update</button>
+        </form>
+      </td>
+    </tr>
+    <?php endforeach; ?>
+  </table>
+</div>
+
+<?php require '../includes/footer.php'; ?>
